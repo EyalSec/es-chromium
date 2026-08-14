@@ -2,15 +2,16 @@
 
 # es-chromium
 
-**A build of Chromium that tracks attacker controlled data through the browser and reports DOM-XSS as it happens.**
+**A browser that tracks attacker controlled data as you browse and reports DOM-XSS as it happens.**
 
 [![Website](https://img.shields.io/badge/website-eyalsec.com-e8b04b)](https://eyalsec.com)
 [![Docs](https://img.shields.io/badge/docs-user%20guide-2a2c27)](https://eyalsec.com/docs)
 [![Demo](https://img.shields.io/badge/demo-vulnerable--javascript-2a2c27)](https://github.com/EyalSec/vulnerable-javascript)
 
 `es-chromium` is a browser from [EyalSec](https://eyalsec.com). The tracking is
-compiled into V8 and Blink in C and C++; no JavaScript is injected into the
-page, and nothing is asked of the site. You browse an application with it, and
+part of the browser itself; no JavaScript is injected into the page, no
+extension is installed, and nothing is asked of the site. You browse an
+application with it, and
 when data from a source an attacker can influence reaches a dangerous DOM
 operation, the whole flow is reported to your dashboard: the source, the sink,
 and the exact characters that were tainted.
@@ -130,8 +131,8 @@ Full guide: **[eyalsec.com/docs](https://eyalsec.com/docs)**.
 ## About this repository
 
 This repository is the public home and documentation for `es-chromium`. The
-patched browser is the product and is delivered through the dashboard; there is
-no source to build here. Start at **[eyalsec.com](https://eyalsec.com)**.
+browser itself is the product and is delivered through the dashboard; there is
+nothing to build here. Start at **[eyalsec.com](https://eyalsec.com)**.
 
 ---
 
