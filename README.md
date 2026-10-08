@@ -21,6 +21,11 @@ It is the browser counterpart of
 question one layer out: not "could this be exploitable" but "did attacker
 controlled data actually get there".
 
+**Who it is for:** penetration testers and AppSec teams testing web
+applications for DOM-based cross-site scripting. It is a testing browser, not an
+everyday one: it reports the page URLs you visit and the values that reached a
+sink.
+
 ## What it catches
 
 DOM-XSS in the shapes it really occurs in, rather than in the shapes a test
@@ -115,26 +120,37 @@ sites.
 
 **[EyalSec/vulnerable-javascript](https://github.com/EyalSec/vulnerable-javascript)**
 is a deliberately vulnerable single page dashboard, live at a real HTTPS origin.
-Open it in stock Chrome and it is a normal application that quietly runs the
+Open it in an ordinary browser and it is a normal application that quietly runs the
 payload. Open the same unchanged page in `es-chromium` and every flow is
 reported, with the source, the sink and the payload.
 
 ## Getting it
 
 `es-chromium` is delivered through the EyalSec dashboard rather than downloaded
-from here. Sign in at [eyalsec.com](https://eyalsec.com), add a machine of kind
-*browser*, and run the one line installer it gives you. The build reports to
-your dashboard using that machine's token.
+from here, and it is enabled per account as part of a plan. There is no
+self-serve plan and no trial: **[Book a live demo](https://eyalsec.com/contact)**.
 
-Full guide: **[eyalsec.com/docs](https://eyalsec.com/docs)**.
+Once it is enabled on your account:
+
+1. On the **Machines** page, choose *es-chromium* under **Product**, name the
+   PC and click **Add machine**.
+2. Click **Install**, copy the command (valid for 10 minutes) and run it in a
+   terminal on that PC.
+3. Start the browser with the address you want to test, for example
+   `es-chromium http://your-target.example/`. Findings appear on the
+   es-chromium list of your events page.
+
+Full guide: **[es-chromium in the user guide](https://eyalsec.com/docs/es-chromium)**.
+
+## Learn more
+
+- **[Documentation](https://eyalsec.com/docs)**: install, read events, write rules
+- **[Research](https://eyalsec.com/research)**: write-ups from EyalSec
+- **[Vulnerability guides](https://eyalsec.com/vulnerabilities)**: injection
+  classes explained, with fixes
 
 ## About this repository
 
 This repository is the public home and documentation for `es-chromium`. The
 browser itself is the product and is delivered through the dashboard; there is
 nothing to build here. Start at **[eyalsec.com](https://eyalsec.com)**.
-
----
-
-Chromium is a project of The Chromium Authors. EyalSec is not affiliated with
-or endorsed by Google or the Chromium project.
