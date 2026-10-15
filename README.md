@@ -7,6 +7,7 @@
 [![Website](https://img.shields.io/badge/website-eyalsec.com-e8b04b)](https://eyalsec.com)
 [![Docs](https://img.shields.io/badge/docs-user%20guide-2a2c27)](https://eyalsec.com/docs)
 [![Demo](https://img.shields.io/badge/demo-vulnerable--javascript-2a2c27)](https://github.com/EyalSec/vulnerable-javascript)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/EyalSec/es-chromium/badge)](https://scorecard.dev/viewer/?uri=github.com/EyalSec/es-chromium)
 
 `es-chromium` is a browser from [EyalSec](https://eyalsec.com). The tracking is
 part of the browser itself; no JavaScript is injected into the page, no
