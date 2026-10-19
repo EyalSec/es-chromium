@@ -9,28 +9,53 @@
 [![Demo](https://img.shields.io/badge/demo-vulnerable--javascript-2a2c27)](https://github.com/EyalSec/vulnerable-javascript)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/EyalSec/es-chromium/badge)](https://scorecard.dev/viewer/?uri=github.com/EyalSec/es-chromium)
 
-`es-chromium` is a browser from [EyalSec](https://eyalsec.com). The tracking is
-part of the browser itself; no JavaScript is injected into the page, no
-extension is installed, and nothing is asked of the site. You browse an
-application with it, and
-when data from a source an attacker can influence reaches a dangerous DOM
+`es-chromium` is the EyalSec browser. You browse the application you are
+testing with it; no JavaScript is injected into the page, no extension is
+installed, and nothing is asked of the site. When data from a source an attacker can influence reaches a dangerous DOM
 operation, the whole flow is reported to your dashboard: the source, the sink,
 and the exact characters that were tainted.
-
-It is the browser counterpart of
-[`es-python`](https://github.com/EyalSec/es-python), and it answers the same
-question one layer out: not "could this be exploitable" but "did attacker
-controlled data actually get there".
 
 **Who it is for:** penetration testers and AppSec teams testing web
 applications for DOM-based cross-site scripting. It is a testing browser, not an
 everyday one: it reports the page URLs you visit and the values that reached a
 sink.
 
+## Install and run
+
+Once es-chromium is enabled on your account
+([book a live demo](https://eyalsec.com/contact)), choose **es-chromium** under
+**Product** on the **Machines** page, name the PC, click **Add machine**, then
+**Install**. Copy the one-line command from the panel (one-time token, valid
+for 10 minutes), run it in a terminal on that PC, then start the browser:
+
+```bash
+es-chromium http://your-target.example/
+```
+
+A finding reads as a flow on the es-chromium list of your events page, source
+then sink, followed by the page it happened on:
+
+```
+location.hash -> Element.innerHTML
+```
+
+Full guide: **[es-chromium in the user guide](https://eyalsec.com/docs/es-chromium)**.
+
+## How it works
+
+- **Sources**: the places a page takes input from. The URL, `postMessage`,
+  `window.name`, the referrer, cookies, web storage, fetched responses.
+- **Sinks**: the operations that can turn that input into markup, code or
+  navigation. `innerHTML`, `document.write`, `eval`, script URLs, attribute
+  writes.
+- **A finding** is a flow that really happened in the page you browsed, from
+  the input to the sink that used it, with the attacker-controlled characters
+  marked. Page weaknesses with no flow (a missing Content-Security-Policy, a
+  cookie without `Secure`) are reported separately as posture.
+
 ## What it catches
 
-DOM-XSS in the shapes it really occurs in, rather than in the shapes a test
-suite likes:
+DOM-XSS in the shapes it takes on real pages:
 
 - URL fragment and query string into markup sinks (`innerHTML`, `outerHTML`,
   `insertAdjacentHTML`, `document.write`, `DOMParser`)
@@ -46,36 +71,25 @@ suite likes:
 - Navigation built from `document.referrer` or the URL
 - Flows that cross into a shadow root
 
-## Coverage
+## Coverage you can re-run
 
-The detector registry declares **241 detectors**: 135 taint, 57 posture and 49
-behavioral, of which 169 are armed by default.
-
-That is what is declared. What is **demonstrated** is the number that matters,
-and it is published rather than asserted:
 [`EyalSec/vulnerable-javascript`](https://github.com/EyalSec/vulnerable-javascript)
 is a deliberately vulnerable retail dashboard, hosted at a real origin, in which
 **21 flows across 8 taint sources and 18 distinct sinks** are each driven by a
 single URL and each observed firing. The harness that drives them is committed
-alongside it, so any claim here can be re-run against any build:
-
-```bash
-./run-eschromium.sh /path/to/es-chromium https://eyalsec.github.io/vulnerable-javascript/
-```
-
-A detector that is declared but not demonstrated is not advertised here as
-coverage.
+alongside it, so the claim can be re-run. Every flow advertised here is one you
+can watch fire.
 
 ## How it differs from a scanner
 
-A scanner reads the page, or crawls it, and reasons about which sinks might be
-reachable with which input. It has to guess about reachability, and it guesses
-without the third party widgets loaded, without the saved theme in local
-storage, and without the cookie the last visit wrote.
+A scanner reads the page, or crawls it, from outside the session, so it reasons
+about which sinks could be reached with which input. That is useful work, and
+it is done without the third party widgets loaded, the saved theme in local
+storage, or the cookie the last visit wrote.
 
-`es-chromium` is the browser. It sees the page as the user's browser sees it,
-with everything loaded and every previous visit's state in place, and it reports
-a flow that happened. That is why its findings come with the payload attached.
+`es-chromium` is the browser. It sees the page as your browser sees it, with
+the widgets loaded and the last visit's state in place, so it reports the flow
+that happened. That is why its findings come with the payload attached.
 
 ## Why the output is readable
 
@@ -86,62 +100,35 @@ a flow that happened. That is why its findings come with the payload attached.
 - **Posture findings are separated from flows.** Missing CSP, missing
   `X-Frame-Options` and the rest are reported as posture, with no flow attached,
   and they never masquerade as an injection.
-- **Telemetry is not a finding.** A source being read, with no sink and no
-  flow, is not shown as a security event.
 
-## Limitations
+## Scope
 
-Stated here rather than discovered later. All of these were measured against
-the build published 2026-08-04.
+Measured on the release of 2026-08-04.
 
-- **Taint does not survive every string operation.** It is preserved through
+- **Taint is followed through the string operations pages use most:**
   concatenation, template literals, `slice`/`substring`, `trim`, `padStart`,
   `replace`, `JSON` round trips, percent encoding and splitting on a separator.
-  It is **lost** through case folding (`toUpperCase`/`toLowerCase`), through
-  `atob`, and through decomposing a string to individual characters and
-  rejoining it. A page that lower cases a parameter before rendering it is
-  therefore a real flow that goes unreported. The three cases are catalogued in
-  the demo app so any future build re-checks them.
-- **It is sanitizer blind.** A value passed through a sanitizer before
-  `innerHTML` is still reported, because the taint survives the sanitizer. The
-  finding is correct about the flow and wrong about the risk.
-- **Response bodies are tainted unconditionally**, so an application that
-  renders API data into the DOM reports flows that are working as intended.
-  That is the right threat model for DOM-XSS and it is also why a data heavy
-  site is noisier than a simple one.
-- **A taint tracker cannot see what it cannot follow.** A value selected by a
-  branch rather than copied, or carried through a side channel, leaves no trail.
-- **Linux x86-64 today.**
-
-`es-chromium` is a research prototype in active development. False positive
-rate and performance have not been measured across a broad sample of real
-sites.
-
-## See it working
-
-**[EyalSec/vulnerable-javascript](https://github.com/EyalSec/vulnerable-javascript)**
-is a deliberately vulnerable single page dashboard, live at a real HTTPS origin.
-Open it in an ordinary browser and it is a normal application that quietly runs the
-payload. Open the same unchanged page in `es-chromium` and every flow is
-reported, with the source, the sink and the payload.
+  Case folding (`toUpperCase`/`toLowerCase`), `atob`, and decomposing a string
+  to individual characters and rejoining it end the trail, so a flow through
+  one of them is not reported. The three cases are catalogued in the demo app
+  so every release re-checks them.
+- **A sanitized value is still reported as a flow**, because the taint survives
+  the sanitizer. The event shows you the flow; you judge whether the sanitizer
+  made it safe.
+- **Response bodies are treated as attacker-influenced**, the right threat
+  model for DOM-XSS, so an application that renders API data into the DOM
+  reports those flows too and a data heavy site produces more of them.
+- **It follows copied data.** A value selected by a branch rather than copied,
+  or carried through a side channel, leaves no trail to follow.
+- **It reports, and rules decide what you see.** Rules show or hide findings
+  on the dashboard.
+- **Runs on Linux x86_64.**
 
 ## Getting it
 
-`es-chromium` is delivered through the EyalSec dashboard rather than downloaded
-from here, and it is enabled per account as part of a plan. There is no
-self-serve plan and no trial: **[Book a live demo](https://eyalsec.com/contact)**.
-
-Once it is enabled on your account:
-
-1. On the **Machines** page, choose *es-chromium* under **Product**, name the
-   PC and click **Add machine**.
-2. Click **Install**, copy the command (valid for 10 minutes) and run it in a
-   terminal on that PC.
-3. Start the browser with the address you want to test, for example
-   `es-chromium http://your-target.example/`. Findings appear on the
-   es-chromium list of your events page.
-
-Full guide: **[es-chromium in the user guide](https://eyalsec.com/docs/es-chromium)**.
+**[Book a live demo](https://eyalsec.com/contact)** and we run it on your own
+application with you. There is no self-serve plan and no trial. `es-chromium`
+arrives through the EyalSec dashboard, enabled per account as part of a plan.
 
 ## Learn more
 
@@ -150,8 +137,15 @@ Full guide: **[es-chromium in the user guide](https://eyalsec.com/docs/es-chromi
 - **[Vulnerability guides](https://eyalsec.com/vulnerabilities)**: injection
   classes explained, with fixes
 
-## About this repository
+## Support and security
 
-This repository is the public home and documentation for `es-chromium`. The
-browser itself is the product and is delivered through the dashboard; there is
-nothing to build here. Start at **[eyalsec.com](https://eyalsec.com)**.
+- Questions and problems: **support@eyalsec.com**, or an
+  [issue](https://github.com/EyalSec/es-chromium/issues) here (see
+  [CONTRIBUTING.md](CONTRIBUTING.md)).
+- A vulnerability in EyalSec itself: **security@eyalsec.com**, under our
+  [disclosure policy](https://eyalsec.com/legal/vulnerability-disclosure). See
+  [SECURITY.md](SECURITY.md). es-chromium is built for security testing
+  rather than everyday browsing; the policy says what that means for a report.
+
+This repository is the public home and documentation for `es-chromium`; the
+browser itself arrives through the dashboard.
