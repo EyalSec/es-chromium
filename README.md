@@ -108,18 +108,12 @@ Measured on the release of 2026-08-04.
 - **Taint is followed through the string operations pages use most:**
   concatenation, template literals, `slice`/`substring`, `trim`, `padStart`,
   `replace`, `JSON` round trips, percent encoding and splitting on a separator.
-  Case folding (`toUpperCase`/`toLowerCase`), `atob`, and decomposing a string
-  to individual characters and rejoining it end the trail, so a flow through
-  one of them is not reported. The three cases are catalogued in the demo app
-  so every release re-checks them.
 - **A sanitized value is still reported as a flow**, because the taint survives
   the sanitizer. The event shows you the flow; you judge whether the sanitizer
   made it safe.
 - **Response bodies are treated as attacker-influenced**, the right threat
   model for DOM-XSS, so an application that renders API data into the DOM
   reports those flows too and a data heavy site produces more of them.
-- **It follows copied data.** A value selected by a branch rather than copied,
-  or carried through a side channel, leaves no trail to follow.
 - **It reports, and rules decide what you see.** Rules show or hide findings
   on the dashboard.
 - **Runs on Linux x86_64.**

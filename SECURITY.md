@@ -48,8 +48,8 @@ flaw in our own functionality is in scope and we want it.
 
 ## Not a vulnerability in EyalSec
 
-- **A missed detection or a false positive** is a product issue and very
-  welcome: open an issue with the bug report form, or email eyal@eyalsec.com.
+- **A question about what es-python or es-chromium reported** is a product
+  issue and very welcome: open an issue with the bug report form, or email eyal@eyalsec.com.
 - **A vulnerability es-python or es-chromium showed you in someone else's
   software** belongs to that project's maintainers. Report it to them
   privately. Please do not post it here.
